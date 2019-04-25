@@ -24,9 +24,20 @@ int tryguess(char *hash, char *guess)
     // Hash the guess using MD5
     void *check =  md5(guess, file_length(guess));
     // Compare the two hashes
-    if (check == hash) {free(check); return 1;} 
+    printf("check: %s hash: %s\n", check, hash);
+    
+    if (strcmp(check, hash) == 0) 
+    {
+        free(check); 
+        return 1;
+    } 
     // Free any malloc'd memory
-    else {free(check); return 0;}
+    else 
+    {
+        free(check); 
+        return 0;
+        
+    }
 }
 
 // Read in the dictionary file and return the array of strings
@@ -37,13 +48,10 @@ int tryguess(char *hash, char *guess)
 char **read_dictionary(char *filename, int *size)
 {
     int len = file_length(filename);
-    printf("check two:  %d\n", len);
     char * contents = malloc(sizeof(char) * len);
-    printf("check three\n");
+    
     FILE * f = NULL;
-    printf("check four\n");
     f = fopen(filename, "r");
-    printf("check five\n");
     if (!f)
     {
         printf("Can't open for reading\n");
@@ -55,7 +63,7 @@ char **read_dictionary(char *filename, int *size)
     fclose(f);
     
     int passcount;
-    printf("check six\n");
+
     for (int k = 0; k < len; k++)
     {
         if (contents[k] == '\n') 
@@ -67,7 +75,7 @@ char **read_dictionary(char *filename, int *size)
     }
     
     char **dictionary = malloc(passcount * sizeof(char *)); 
-    printf("check seven\n");
+
     dictionary[0] = contents;
     int j = 1;
     
@@ -80,18 +88,15 @@ char **read_dictionary(char *filename, int *size)
         }    
     }
     
-    *size = len;
-   printf("check eight\n"); 
+    *size = passcount;
     return dictionary;
         
 }
   
-    
 int main(int argc, char *argv[])
 {
-    printf("check one\n");
-    
-    if (argc < 3) 
+
+    if (argc < 3)
     {
         printf("Usage: %s hash_file dict_file\n", argv[0]);
         exit(1);
@@ -102,11 +107,8 @@ int main(int argc, char *argv[])
     int dlen = file_length(argv[2]);
     
     printf("dlen: %d hlen: %d\n", dlen, hlen);
-    
-    char **dict = read_dictionary(argv[2], &dlen);
-    
-    // Open the hash file for reading.
-    
+   
+   // Open the hash file for reading. 
     FILE *e = fopen(argv[1], "r");
     if (!e)
     {
@@ -122,31 +124,37 @@ int main(int argc, char *argv[])
         exit(1);
         
     }
-    printf("check nine\n"); 
-    //char *hash = malloc(file_length(*f));
-    char *hashfile;
-    char *passfile;
     
-    //fread(hashfile, 1, len, f);
-    //fclose(f);
+    char **dict = read_dictionary(argv[2], &dlen);
+
+    char *hashfile = malloc(hlen);
+
+    fread(hashfile, 1, hlen, e);
     
-    char *hashwrite;
-    char *passwrite;
+    char hashwrite[34];
+    char passwrite[34];
     
-    
+    printf("outside the while loop\n");
     // For each hash, try every entry in the dictionary.
-    printf("check ten\n"); 
-    while (fgets(passwrite, PASS_LEN, f)!= NULL)
+    
+    while (fgets(hashwrite, 34, e)!= NULL)
     {
-        printf("loop check\n");
+        printf("inside the while loop\n");
         
-        while (fgets(hashwrite, HASH_LEN, e)!= NULL)
+        hashwrite[strlen(hashwrite) -1] = '\0';
+        
+        for (int i = 0; i < hlen; i++)
         {
-            if (tryguess(hashfile, passfile) == 1) printf("%s , %s", hashfile, passfile);
+            if (tryguess(hashwrite, dict[i]) == 1) printf("%s , %s\n", hashwrite, dict[i]);
         }
         
         // Print the matching dictionary entry.
     }
-    printf("check eleven\n"); 
-    // Need two nested loops.
+    
+    free(hashfile);
+    fclose(e);
+    fclose(f);
+   
+    
+        // Need two nested loops.
 }

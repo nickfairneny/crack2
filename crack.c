@@ -22,19 +22,19 @@ int file_length(char *filename)
 int tryguess(char *hash, char *guess)
 {
     // Hash the guess using MD5
-    void *check =  md5(guess, file_length(guess));
+    const char *check =  md5(guess, file_length(guess));
     // Compare the two hashes
     printf("check: %s hash: %s\n", check, hash);
     
     if (strcmp(check, hash) == 0) 
     {
-        free(check); 
+        free((const char *)check); 
         return 1;
     } 
     // Free any malloc'd memory
     else 
     {
-        free(check); 
+        free((const char *)check); 
         return 0;
         
     }
@@ -62,7 +62,9 @@ char **read_dictionary(char *filename, int *size)
     fread(contents, 1, len, f);
     fclose(f);
     
-    int passcount;
+    int passcount = 0;
+    
+    //printf("length; %d\n", len);
 
     for (int k = 0; k < len; k++)
     {
@@ -81,8 +83,9 @@ char **read_dictionary(char *filename, int *size)
     
     for (int i = 0; i < len; i++)
     {
-        if (contents[i] == '\n') 
+        if (contents[i] == '\0') 
         {
+            printf("Adding %s to dictionary\n", &contents[i+1]);
             dictionary[j] = &contents[i+1];
             j++;
         }    
@@ -129,7 +132,7 @@ int main(int argc, char *argv[])
 
     char *hashfile = malloc(hlen);
 
-    fread(hashfile, 1, hlen, e);
+    //fread(hashfile, 1, hlen, e);
     
     char hashwrite[34];
     char passwrite[34];
@@ -141,10 +144,13 @@ int main(int argc, char *argv[])
     {
         printf("inside the while loop\n");
         
-        hashwrite[strlen(hashwrite) -1] = '\0';
+        hashwrite[strlen(hashwrite) - 1] = '\0';
         
-        for (int i = 0; i < hlen; i++)
+        //printf("%s", hashwrite);
+        
+        for (int i = 0; i < dlen; i++)
         {
+            printf("comparing %s, %s\n", hashwrite, dict[i]);
             if (tryguess(hashwrite, dict[i]) == 1) printf("%s , %s\n", hashwrite, dict[i]);
         }
         

@@ -22,19 +22,19 @@ int file_length(char *filename)
 int tryguess(char *hash, char *guess)
 {
     // Hash the guess using MD5
-    const char *check =  md5(guess, file_length(guess));
+    char *check =  md5(guess, strlen(guess));// strlen maybe
     // Compare the two hashes
-    printf("check: %s hash: %s\n", check, hash);
+    //printf("check: %s hash: %s\n", check, hash);
     
     if (strcmp(check, hash) == 0) 
     {
-        free((const char *)check); 
+        free(check); 
         return 1;
     } 
     // Free any malloc'd memory
     else 
     {
-        free((const char *)check); 
+        free(check); 
         return 0;
         
     }
@@ -132,26 +132,19 @@ int main(int argc, char *argv[])
 
     char *hashfile = malloc(hlen);
 
-    //fread(hashfile, 1, hlen, e);
-    
     char hashwrite[34];
     char passwrite[34];
     
-    printf("outside the while loop\n");
     // For each hash, try every entry in the dictionary.
     
     while (fgets(hashwrite, 34, e)!= NULL)
     {
-        printf("inside the while loop\n");
-        
         hashwrite[strlen(hashwrite) - 1] = '\0';
-        
-        //printf("%s", hashwrite);
         
         for (int i = 0; i < dlen; i++)
         {
-            printf("comparing %s, %s\n", hashwrite, dict[i]);
-            if (tryguess(hashwrite, dict[i]) == 1) printf("%s , %s\n", hashwrite, dict[i]);
+            //printf("comparing %s, %s\n", hashwrite, dict[i]);
+            if (tryguess(hashwrite, dict[i]) == 1) printf("MATCH! %s , %s\n", hashwrite, dict[i]);
         }
         
         // Print the matching dictionary entry.
